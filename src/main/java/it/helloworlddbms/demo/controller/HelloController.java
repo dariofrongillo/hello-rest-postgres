@@ -20,18 +20,21 @@ public class HelloController {
     @GetMapping("/hello-world")
     private ResponseEntity<?> getHelloWorldMessage(@RequestParam(name = "language", required = true) String language) {
         log.info("GET REQUEST");
-        return ResponseEntity.ok(this.helloMessageRepository.findById(language)
-                .orElseThrow(() -> new RuntimeException("language" + language + " not supported")));
+        HelloMessage message = this.helloMessageRepository.findById(language)
+                .orElse(null);
+
+        return message != null ? ResponseEntity.ok(message) : ResponseEntity.notFound().build();
     }
 
     @PostMapping("/hello-world")
     private ResponseEntity<?> postHelloWorldMessage(@RequestBody HelloMessage helloMessage) {
         log.info("POST REQUEST");
 
-        this.helloMessageRepository.findById(helloMessage.getLanguage())
-                .ifPresent((p) -> {
-                    throw new RuntimeException("language " + helloMessage.getLanguage() + " already configured");
-                });
+        if (this.helloMessageRepository.findById(helloMessage.getLanguage()).isPresent()) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Language " + helloMessage.getLanguage() + " already configured");
+        }
 
         return ResponseEntity.ok(helloMessageRepository.save(helloMessage));
     }

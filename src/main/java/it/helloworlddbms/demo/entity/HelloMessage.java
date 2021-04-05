@@ -22,5 +22,5 @@ public class HelloMessage {
     private String language;
 
     @NotNull
-    private String messages;
+    private String message;
 }
